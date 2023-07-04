@@ -22,7 +22,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     throw new Error("Coupon has expired");
   }
   if (!couponFound) {
-    throw new Error("Coupon does exists");
+    console.warn("Coupon does exists");
   }
 
   //get discount
