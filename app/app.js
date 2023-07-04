@@ -12,6 +12,7 @@ import colorRouter from '../routes/colorsRouter.js';
 import orderRouter from '../routes/ordersRouter.js';
 import Order from '../model/Order.js';
 import couponsRouter from '../routes/couponsRouter.js';
+import cors from 'cors';
 dbConnect();
 const app = express();
 // stripe webhook
@@ -61,6 +62,8 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
   // Return a 200 response to acknowledge receipt of the event
   response.send();
 });
+// Enable CORS and allow requests from all origins
+app.use(cors({ origin: '*' }));
 //pass incoming data
 app.use(express.json());
 
