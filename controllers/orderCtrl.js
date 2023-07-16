@@ -26,7 +26,7 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
   }
 
   //get discount
-  const discount = couponFound?.discount / 100;
+  const discount = couponFound?.discount || 0; // Default to 0 if discount is not available
     //Get the payload(customer, orderItems, shipppingAddress, totalPrice);
     const { orderItems, shippingAddress, totalPrice } = req.body;
     //Find the user
@@ -73,19 +73,22 @@ export const createOrderCtrl = asyncHandler(async (req, res) => {
     // });
   //make payment (stripe)
   //convert order items to have same structure that stripe need
-  const convertedOrders = orderItems.map((item) => {
-    return {
-      price_data: {
-        currency: "INR",
-        product_data: {
-          name: item?.name,
-          description: item?.description,
-        },
-        unit_amount: item?.price * 100,
+const convertedOrders = orderItems.map((item) => {
+  const basePrice = item?.price || 0; // Default to 0 if price is not available
+  const discountedPrice = basePrice - (basePrice * (discount / 100));
+
+  return {
+    price_data: {
+      currency: "INR",
+      product_data: {
+        name: item?.name,
+        description: item?.description,
       },
-      quantity: item?.qty,
-    };
-  });
+      unit_amount: Math.round(discountedPrice * 100),
+    },
+    quantity: item?.qty,
+  };
+});
   const session = await stripe.checkout.sessions.create({
     line_items: convertedOrders,
     metadata: {
